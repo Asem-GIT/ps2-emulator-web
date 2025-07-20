@@ -399,3 +399,17 @@ body {
 .load-game-btn.secondary:hover {
   background: linear-gradient(45deg, #888, #aaa);
 }
+
+.note {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.6rem;
+  color: #ffd700;
+}
+
+.note strong {
+  color: #ffed4e;
+}

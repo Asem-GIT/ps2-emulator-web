@@ -26,32 +26,40 @@ const App: React.FC = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const handleLoadGame = () => {
-        setShowFileModal(true);  // SOLO abrir el modal, nada más
-      };
+      // Validar que sea un archivo ISO válido
+      const validExtensions = ['.iso', '.bin', '.img', '.cue'];
+      const isValidFile = validExtensions.some(ext => 
+        file.name.toLowerCase().endsWith(ext)
+      );
       
-      // Preparar URL del emulador
-      setEmulatorUrl(emulatorOptions.playjs);
-      
-      console.log('Archivo seleccionado:', {
-        name: file.name,
-        size: file.size,
-        type: file.type
-      });
+      if (isValidFile) {
+        setCurrentGame(file);
+        setIsGameLoaded(true);
+        setShowFileModal(false);
+        
+        console.log('Archivo cargado exitosamente:', {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+      } else {
+        alert('Por favor selecciona un archivo ISO, BIN, IMG o CUE válido.');
+      }
     }
   };
       
 
   const handlePlay = () => {
-    if (isGameLoaded) {
+    if (isGameLoaded && currentGame) {
       setIsPlaying(true);
       setShowEmulator(true);
+      setEmulatorUrl(emulatorOptions.playjs);
       
-      // Aquí puedes agregar lógica para pasar el archivo al emulador
-      if (currentGame) {
-        console.log('Iniciando juego:', currentGame.name);
-        // En un emulador real, aquí cargarías el archivo ROM/ISO
-      }
+      console.log('Iniciando juego:', currentGame.name);
+      console.log('URL del emulador:', emulatorOptions.playjs);
+      
+      // Nota: Los emuladores web como Play.js requieren que subas el archivo
+      // desde su interfaz. Este es un emulador externo, no integrado.
     }
   };
 
@@ -207,8 +215,13 @@ console.log({
               <li>2. Haz clic en "Cargar Juego"</li>
               <li>3. Selecciona tu archivo ISO</li>
               <li>4. Haz clic en "Iniciar Juego"</li>
-              <li>5. ¡Disfruta!</li>
+              <li>5. En el emulador web, sube tu archivo ISO</li>
+              <li>6. ¡Disfruta!</li>
             </ul>
+            <div className="note">
+              <strong>Nota:</strong> Este emulador abre Play.js en una nueva ventana. 
+              Necesitarás subir tu archivo ISO desde la interfaz del emulador web.
+            </div>
           </div>
         )}
       </main>
