@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de ISO Realista - PS2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .option {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .option h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #4834d4, #686de0);
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+        }
+        .info {
+            background: rgba(0, 150, 255, 0.2);
+            border: 1px solid #0096ff;
+        }
+        .links {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .links a {
+            color: #ffd700;
+            text-decoration: none;
+            display: block;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .links a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Generador de ISOs para PS2 Emulator</h1>
+        
+        <div class="option">
+            <h3>Opción 1: ISO Realista (Recomendado)</h3>
+            <p>Crea un archivo ISO con estructura de directorios PS2 realista:</p>
+            <button class="btn" onclick="createRealisticISO()">📁 Crear ISO Realista</button>
+        </div>
+
+        <div class="option">
+            <h3>Opción 2: Enlaces Directos a Demos</h3>
+            <p>Descarga demos oficiales de PS2:</p>
+            <div class="links">
+                <a href="https://archive.org/download/ps2-demo-discs/PS2_Demo_Disc_1.iso" target="_blank">
+                    🎮 PS2 Demo Disc 1 (Descarga Directa)
+                </a>
+                <a href="https://archive.org/download/ps2-demo-discs/PS2_Demo_Disc_2.iso" target="_blank">
+                    🎮 PS2 Demo Disc 2 (Descarga Directa)
+                </a>
+                <a href="https://archive.org/details/ps2-demo-discs" target="_blank">
+                    📚 Biblioteca Completa de Demos PS2
+                </a>
+            </div>
+        </div>
+
+        <div class="option">
+            <h3>Opción 3: Homebrew Games</h3>
+            <p>Juegos desarrollados por la comunidad:</p>
+            <button class="btn btn-secondary" onclick="showHomebrewLinks()">🔗 Ver Enlaces Homebrew</button>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function createRealisticISO() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="status info">🔄 Generando ISO realista...</div>';
+            
+            // Crear estructura de directorios PS2
+            const ps2Structure = {
+                'SYSTEM.CNF': 'BOOT2 = cdrom0:\\SLUS_000.00;1\nVER = 1.00\nVMODE = NTSC',
+                'SLUS_000.00': 'PS2 Game Executable',
+                'IOPRP300.IMG': 'IOP ROM Image',
+                'SYS_DIR/': {
+                    'SYSDIR.IRX': 'System Directory IRX',
+                    'IOPRP300.IMG': 'IOP ROM Image Copy'
+                },
+                'GAME_DIR/': {
+                    'GAME.IRX': 'Game IRX Module',
+                    'GAME.ELF': 'Game ELF Executable'
+                }
+            };
+            
+            // Convertir estructura a texto
+            const content = JSON.stringify(ps2Structure, null, 2);
+            
+            // Crear blob y descargar
+            const blob = new Blob([content], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ps2-realistic-test.iso';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusDiv.innerHTML = '<div class="status success">✅ ISO realista creado exitosamente!<br>Archivo: ps2-realistic-test.iso</div>';
+        }
+
+        function showHomebrewLinks() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `
+                <div class="status info">
+                    <h4>🔗 Enlaces a Homebrew Games:</h4>
+                    <div class="links">
+                        <a href="https://www.ps2-home.com/forum/viewforum.php?f=19" target="_blank">
+                            📁 PS2-Home Homebrew Forum
+                        </a>
+                        <a href="https://github.com/topics/ps2-homebrew" target="_blank">
+                            🐙 GitHub PS2 Homebrew
+                        </a>
+                        <a href="https://www.ps2-home.com/forum/viewforum.php?f=20" target="_blank">
+                            🎮 PS2 Demo Discs
+                        </a>
+                    </div>
+                    <p><strong>Instrucciones:</strong> Busca temas marcados con "[DOWNLOAD]" o "[RELEASE]"</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 

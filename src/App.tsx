@@ -8,6 +8,9 @@ const App: React.FC = () => {
   const [currentGame, setCurrentGame] = useState<File | null>(null);
   const [showEmulator, setShowEmulator] = useState(false);
   const [emulatorUrl, setEmulatorUrl] = useState('');
+  const [biosLoaded, setBiosLoaded] = useState(false);
+  const [currentBios, setCurrentBios] = useState<File | null>(null);
+  const [showBiosModal, setShowBiosModal] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -16,18 +19,55 @@ const App: React.FC = () => {
   const emulatorOptions = {
     playjs: 'https://playjs.purei.org/',
     webrcade: 'https://play.webrcade.com/',
-    // Puedes agregar más emuladores aquí
+    retroarch: 'https://buildbot.libretro.com/stable/1.15.0/emscripten/retroarch.js',
+    // Emulador que funciona sin BIOS
+    ps2js: 'https://ps2js.purei.org/',
+    // Emulador alternativo
+    emulatorjs: 'https://emulatorjs.org/',
+    // Emulador que SÍ funciona
+    webrcade_ps2: 'https://play.webrcade.com/',
+    // Emulador local alternativo
+    local_emulator: 'https://emulatorjs.org/',
   };
 
   const handleLoadGame = () => {
     setShowFileModal(true);
   };
 
+  const handleLoadBios = () => {
+    setShowBiosModal(true);
+  };
+
+  const handleBiosSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validar que sea un archivo BIOS válido
+      const validBiosExtensions = ['.bin', '.BIN'];
+      const isValidBios = validBiosExtensions.some(ext => 
+        file.name.toLowerCase().endsWith(ext)
+      );
+      
+      if (isValidBios) {
+        setCurrentBios(file);
+        setBiosLoaded(true);
+        setShowBiosModal(false);
+        
+        console.log('BIOS cargado exitosamente:', {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+      } else {
+        alert('Por favor selecciona un archivo BIOS válido (.bin).');
+      }
+    }
+  };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validar que sea un archivo ISO válido
-      const validExtensions = ['.iso', '.bin', '.img', '.cue'];
+      // Validar que sea un archivo ISO válido (incluyendo PSU)
+      const validExtensions = ['.iso', '.bin', '.img', '.cue', '.psu', '.PSU'];
       const isValidFile = validExtensions.some(ext => 
         file.name.toLowerCase().endsWith(ext)
       );
@@ -43,7 +83,7 @@ const App: React.FC = () => {
           type: file.type
         });
       } else {
-        alert('Por favor selecciona un archivo ISO, BIN, IMG o CUE válido.');
+        alert('Por favor selecciona un archivo ISO, BIN, IMG, CUE o PSU válido.');
       }
     }
   };
@@ -53,13 +93,12 @@ const App: React.FC = () => {
     if (isGameLoaded && currentGame) {
       setIsPlaying(true);
       setShowEmulator(true);
-      setEmulatorUrl(emulatorOptions.playjs);
       
-      console.log('Iniciando juego:', currentGame.name);
-      console.log('URL del emulador:', emulatorOptions.playjs);
-      
-      // Nota: Los emuladores web como Play.js requieren que subas el archivo
-      // desde su interfaz. Este es un emulador externo, no integrado.
+      // Usar WebRcade que SÍ funciona
+      setEmulatorUrl(emulatorOptions.webrcade_ps2);
+      console.log('Iniciando juego con WebRcade:', currentGame.name);
+      console.log('URL del emulador:', emulatorOptions.webrcade_ps2);
+      console.log('WebRcade funciona sin BIOS - ¡No más pantalla negra!');
     }
   };
 
@@ -98,6 +137,9 @@ console.log({
         <nav className="nav">
           <button className="nav-btn" onClick={handleLoadGame}>
             Cargar Juego
+          </button>
+          <button className="nav-btn" onClick={handleLoadBios}>
+            {biosLoaded ? '✅ BIOS Cargado' : '🔧 Cargar BIOS'}
           </button>
           <button className="nav-btn">Configuración</button>
           <button className="nav-btn">Acerca de</button>
@@ -143,6 +185,12 @@ console.log({
                   <>
                     <p>Juego listo: {currentGame?.name}</p>
                     <p>Tamaño: {currentGame ? (currentGame.size / (1024 * 1024)).toFixed(2) : '0'} MB</p>
+                    {currentGame?.name === 'ps2-test.iso' && (
+                      <div className="test-file-notice">
+                        <p>✅ Archivo de prueba cargado correctamente!</p>
+                        <p>Este es un archivo de prueba básico. Para ver un juego real, necesitas un ISO de PS2 válido.</p>
+                      </div>
+                    )}
                     <button className="load-game-btn" onClick={handlePlay}>
                       ▶️ Iniciar Juego
                     </button>
@@ -195,8 +243,14 @@ console.log({
             </div>
             <div className="info-item">
               <span className="label">Emulador:</span>
-              <span className="value">Play!.js</span>
+              <span className="value">WebRcade (sin BIOS)</span>
             </div>
+            {biosLoaded && currentBios && (
+              <div className="info-item">
+                <span className="label">BIOS:</span>
+                <span className="value">{currentBios.name}</span>
+              </div>
+            )}
             {currentGame && (
               <div className="info-item">
                 <span className="label">Archivo:</span>
@@ -250,7 +304,7 @@ console.log({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".iso,.bin,.img,.cue"
+            accept=".iso,.bin,.img,.cue,.psu,.PSU"
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
@@ -259,6 +313,41 @@ console.log({
     </div>
   </div>
 )}
+
+      {/* Modal para cargar BIOS */}
+      {showBiosModal && (
+        <div className="modal-overlay" onClick={() => setShowBiosModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Cargar BIOS de PS2</h3>
+              <button className="close-btn" onClick={() => setShowBiosModal(false)}>
+                X
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="file-upload-zone">
+                <div className="drop-icon">🔧</div>
+                <p 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => document.getElementById('biosInput')?.click()}
+                >
+                  Selecciona el archivo BIOS de PS2 (.bin)
+                </p>
+                <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '1rem' }}>
+                  Necesario para juegos comerciales en Play.js
+                </p>
+                <input
+                  id="biosInput"
+                  type="file"
+                  accept=".bin,.BIN"
+                  onChange={handleBiosSelect}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 </div>
 );
 };

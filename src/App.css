@@ -413,3 +413,17 @@ body {
 .note strong {
   color: #ffed4e;
 }
+
+.test-file-notice {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #00ff00;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.6rem;
+  color: #00ff00;
+}
+
+.test-file-notice p {
+  margin: 0.5rem 0;
+}
